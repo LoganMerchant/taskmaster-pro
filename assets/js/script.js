@@ -33,7 +33,6 @@ var loadTasks = function() {
 
   // loop over object properties
   $.each(tasks, function(list, arr) {
-    console.log(list, arr);
     // then loop over sub-array
     arr.forEach(function(task) {
       createTask(task.text, task.date, list);
@@ -45,8 +44,56 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+// for any <p> elements clicked within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('click', "p", function() {
+  // `text` selects the event target, pulls it's inner text, and trims any whitespace.
+  var text = $(this)
+  .text()
+  .trim();
 
+  // `textInput` creates a <textarea> w/ `form-control` as a class and a value equal to what `text` returns.
+  var textInput = $('<textarea>')
+  .addClass('form-control')
+  .val(text);
 
+  // replace the selected `p` element with the <textarea> created by `textInput`
+  $(this).replaceWith(textInput);
+
+  // when `textInput` is triggered, make it the focus of the page, i.e. highlight it.
+  textInput.trigger('focus');
+});
+
+// for any <textarea> elements that lose focus(blur) within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('blur', 'textarea', function() {
+  // get the <textarea>'s current value/text and cut out any unused whitespace
+  var text = $(this)
+  .val()
+  .trim();
+
+  // get the parent <ul>'s id attribute
+  var status = $(this)
+  .closest('.list-group')
+  .attr('id')
+  // replace `list-` with `''`
+  .replace('list-', '');
+
+  // get the task's position in the list of other <li> elements
+  var index = $(this)
+  .closest('.list-group-item')
+  .index();
+
+  // in the `tasks` object, find the [status] array at the provided [index], and make it's text equal to `var text`
+  tasks[status][index].text = text;
+  saveTasks();
+
+  // recreate a <p> element
+  var taskP = $('<p>')
+  .addClass('m-1')
+  .text(text);
+
+  // replace <textarea> with this <p> element
+  $(this).replaceWith(taskP);
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
