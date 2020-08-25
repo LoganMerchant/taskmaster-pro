@@ -25,42 +25,64 @@
     </header>
     <main class="col-12 col-lg-9">
       <div class="m-5 row justify-content-around">
+        <!-- todo start -->
         <div class="col-12 col-md-6 col-xl-3 mb-3">
-          <h2>To Do</h2>
-          <ul id="list-toDo" class="list-group"> </ul>
+          <div class="card">
+            <h4 class="card-header">
+              To Do
+            </h4>
+            <ul id="list-toDo" class="list-group list-group-flush">
+              <li class="list-group-item">
+                <span class="badge badge-primary badge-pill">08/07/2918</span>
+                <p class="m-1">Sample...</p>
+              </li>
+            </ul>
+          </div>
         </div>
         <!-- todo end -->
         <!-- in progress start -->
         <div class="col-12 col-md-6 col-xl-3 mb-3">
-          <h2>In Progress</h2>
-          <ul id="list-inProgress" class="list-group">
-            <li class="list-group-item">
-              <span class="badge badge-primary badge-pill">09/87/2312</span>
-              <p class="m1-">Sample</p>
-            </li>
-          </ul>
+          <div class="card">
+            <h4 class="card-header">
+              In Progress
+            </h4>
+            <ul id="list-inProgress" class="list-group list-group-flush">
+              <li class="list-group-item">
+                <span class="badge badge-primary badge-pill">09/87/2312</span>
+                <p class="m-1">Sample</p>
+              </li>
+            </ul>
+          </div>
         </div>
         <!-- in progress end -->
         <!-- in review start -->
         <div class="col-12 col-md-6 col-xl-3 mb-3">
-          <h2>In Review</h2>
-          <ul id="list-inReview" class="list-group">
-            <li class="list-group-item">
-              <span class="badge badge-primary badge-pill">07/04/1321</span>
-              <p class="m-1">Sample Task</p>
-            </li>
-          </ul>
+          <div class="card">
+            <h4 class="card-header">
+              In Review
+            </h4>
+            <ul id="list-inReview" class="list-group list-group-flush">
+              <li class="list-group-item">
+                <span class="badge badge-primary badge-pill">07/04/1321</span>
+                <p class="m-1">Sample Task</p>
+              </li>
+            </ul>
+          </div>
         </div>
         <!-- in review end -->
         <!-- done start -->
         <div class="col-12 col-md-6 col-xl-3 mb-3">
-          <h2>Done</h2>
-          <ul id="list-done" class="list-group">
-            <li class="list-group-item">
-              <span class="badge badge-primary badge-pill">87/32/9873</span>
-              <p class="m-1">Sample Again</p>
-            </li>
-          </ul>
+          <div class="card">
+            <h4 class="card-header">
+              Done
+            </h4>
+            <ul id="list-done" class="list-group list-group-flush">
+              <li class="list-group-item">
+                <span class="badge badge-primary badge-pill">87/32/9873</span>
+                <p class="m-1">Sample Again</p>
+              </li>
+            </ul>
+          </div>
         </div>
         <!-- done end -->
       </div>
@@ -82,11 +104,11 @@
           <form>
             <div class="form-group">
               <label for="modalTaskDescription">Task description</label>
-              <textarea id="modalTaskDescription" rows="3"></textarea>
+              <textarea id="modalTaskDescription" rows="3" class="form-control"></textarea>
             </div>
             <div class="form-group">
               <label for="modalDueDate">Due date</label>
-              <input type="text" id="modalDueDate" placeholder="mm/dd/yyyy" autocomplete="off" />
+              <input type="text" class="form-control" id="modalDueDate" placeholder="mm/dd/yyyy" autocomplete="off" />
             </div>
           </form>
         </div>
