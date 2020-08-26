@@ -230,6 +230,18 @@ $('.card .list-group').sortable({
   },
 });
 
+// designates any element with an id of `trash` is a droppable element.
+$('#trash').droppable({
+  // the droppable element accepts any `list-group-item` coming from a `card`
+  accept: '.card .list-group-item',
+  // as soon as the draggable element itself touches the droppable element, it is able to be dropped.
+  tolerance: 'touch',
+  // on element drop, perform the `remove()` method on the draggable element. 
+  drop: function(event, ui) {
+    ui.draggable.remove();
+  },
+});
+
 // remove all tasks
 $("#remove-tasks").on("click", function() {
   for (var key in tasks) {
