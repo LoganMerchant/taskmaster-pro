@@ -182,6 +182,54 @@ $("#task-form-modal .btn-primary").click(function() {
   }
 });
 
+// every element with a `list-group` class, nested within a `card` class, is a sortable list.
+$('.card .list-group').sortable({
+  // elements with a `list-group` class, nested within a `card` class, are connected as 'sortable'.
+  connectWith: $('.card .list-group'),
+  // prevents the dragged element from scrolling the page
+  scroll: false,
+  // sets the where the test is held to determine if the moved item is hovering over a valid item. 
+  // here it is saying to look for wherever the cursor is
+  tolerance: 'pointer',
+  // creates a copy of the dragged element that moves instead of the original element selected.
+  helper: 'clone',
+
+  update: function(event) {
+    // empty array to store task data in
+    var taskListArr = [];
+
+    // loop over current set of children in sortable list
+    $(this).children().each(function() {
+      // find the <p> element of the child being looped over and trim it's text
+      var text = $(this)
+      .find('p')
+      .text()
+      .trim();
+
+      // find the <span> element of the child being looped over and trim it's text.
+      var date = $(this)
+      .find('span')
+      .text()
+      .trim();
+
+      // push the found text and date of the sorted <li> into an array, as an object. 
+      taskListArr.push({
+        text: text, 
+        date: date
+      });
+    });
+
+    // trim down list's ID to match object property
+    var arrName = $(this)
+    .attr('id')
+    .replace('list-', '');
+
+    // update array on tasks object and save
+    tasks[arrName] = taskListArr;
+    saveTasks();
+  },
+});
+
 // remove all tasks
 $("#remove-tasks").on("click", function() {
   for (var key in tasks) {
