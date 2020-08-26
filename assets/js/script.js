@@ -200,31 +200,31 @@ $('.card .list-group').sortable({
 
     // loop over current set of children in sortable list
     $(this).children().each(function() {
-      // find the <p> element of the child being looped over and trim it's text
+      // find the <p> elements of the children being looped over and trim their text
       var text = $(this)
       .find('p')
       .text()
       .trim();
 
-      // find the <span> element of the child being looped over and trim it's text.
+      // find the <span> elements of the children being looped over and trim their text.
       var date = $(this)
       .find('span')
       .text()
       .trim();
 
-      // push the found text and date of the sorted <li> into an array, as an object. 
+      // push the found texts and dates of any <li>s into an array, as an object. 
       taskListArr.push({
         text: text, 
         date: date
       });
     });
 
-    // trim down list's ID to match object property
+    // trim down the list's ID to match it's `tasks` object property
     var arrName = $(this)
     .attr('id')
     .replace('list-', '');
 
-    // update array on tasks object and save
+    // update array on `tasks` object and save to localStorage
     tasks[arrName] = taskListArr;
     saveTasks();
   },
