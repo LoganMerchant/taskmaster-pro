@@ -96,7 +96,7 @@ $('.list-group').on('blur', 'textarea', function() {
   $(this).replaceWith(taskP);
 });
 
-// for any <span> (i.e. due date) elements clicked within a parent element with a class of `list-group`, perform this function...
+// for any <input> elements that change w/ a `type='text'`, within a parent `class='list-group'`, perform this function...
 $('.list-group').on('click', 'span', function() {
   // get current text
   var date = $(this)
@@ -113,12 +113,22 @@ $('.list-group').on('click', 'span', function() {
   // swap out elements
   $(this).replaceWith(dateInput);
 
+  // when the due date is edited...
+  dateInput.datepicker({
+    // pull up a calendar with tomorrow as the earliest possible selection
+    minDate: 1,
+    onClose: function() {
+      // when calendar is closed, force a 'change' event on the `dateInput`/`this`
+      $(this).trigger('change');
+    }
+  });
+
   // automatically focus on new element
   dateInput.trigger('focus');
 });
 
-// for any <input> elements, with a type of `text`, that lose focus(blur) within a parent element with a class of `list-group`, perform this function...
-$('.list-group').on('blur', 'input[type="text"]', function() {
+// for any <input> elements, with a type of `text`, that change within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('change', 'input[type="text"]', function() {
   // get current text
   var date = $(this)
   .val()
@@ -180,6 +190,12 @@ $("#task-form-modal .btn-primary").click(function() {
 
     saveTasks();
   }
+});
+
+// modal's due date field is selected, show calendar
+$('#modalDueDate').datepicker({
+  // the first available date to select is today + 1...or tomorrow
+  minDate: 1,
 });
 
 // every element with a `list-group` class, nested within a `card` class, is a sortable list.
