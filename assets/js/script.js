@@ -13,6 +13,7 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  auditTask(taskLi);
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -33,7 +34,6 @@ var loadTasks = function() {
 
   // loop over object properties
   $.each(tasks, function(list, arr) {
-    console.log(list, arr);
     // then loop over sub-array
     arr.forEach(function(task) {
       createTask(task.text, task.date, list);
@@ -45,8 +45,144 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+var auditTask = function (taskEl) {
+  // get date from task element
+  var date = $(taskEl).find('span').text().trim();
+  
+  // convert to moment object at 5:00pm
+  var time = moment(date, "L").set('hour', 17);
 
+  // remove any old classes from element
+  $(taskEl).removeClass('list-group-item-warning list-group-item-danger');
 
+  // apply new class if task is near/over due date
+  // if this moment in time is after the `time`, apply a red background, i.e. `list-group-item-danger`.
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass('list-group-item-danger');
+  } 
+  // if this moment in time is less than two days away, apply a yellow background, i.e. `list-group-item-warning`
+  // Math.abs() is wrapping this to swap the result from being -2 days away to 2 days away. (think t-minus seconds to countdown)
+  else if (Math.abs(moment().diff(time, 'days')) <= 2) {
+    $(taskEl).addClass('list-group-item-warning');
+  }
+}
+
+// for any <p> elements clicked within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('click', "p", function() {
+  // `text` selects the event target, pulls it's inner text, and trims any whitespace.
+  var text = $(this)
+  .text()
+  .trim();
+
+  // `textInput` creates a <textarea> w/ `form-control` as a class and a value equal to what `text` returns.
+  var textInput = $('<textarea>')
+  .addClass('form-control')
+  .val(text);
+
+  // replace the selected `p` element with the <textarea> created by `textInput`
+  $(this).replaceWith(textInput);
+
+  // when `textInput` is triggered, make it the focus of the page, i.e. highlight it.
+  textInput.trigger('focus');
+});
+
+// for any <textarea> elements that lose focus(blur) within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('blur', 'textarea', function() {
+  // get the <textarea>'s current value/text and cut out any unused whitespace
+  var text = $(this)
+  .val()
+  .trim();
+
+  // get the parent <ul>'s id attribute
+  var status = $(this)
+  .closest('.list-group')
+  // gets an attribute since there is only one argument
+  .attr('id')
+  // replace `list-` with `''`
+  .replace('list-', '');
+
+  // get the task's position in the list of other <li> elements
+  var index = $(this)
+  .closest('.list-group-item')
+  .index();
+
+  // in the `tasks` object, find the [status] array at the provided [index], and make it's text equal to `var text`
+  tasks[status][index].text = text;
+  saveTasks();
+
+  // recreate a <p> element
+  var taskP = $('<p>')
+  .addClass('m-1')
+  .text(text);
+
+  // replace <textarea> with this <p> element
+  $(this).replaceWith(taskP);
+});
+
+// for any <input> elements that change w/ a `type='text'`, within a parent `class='list-group'`, perform this function...
+$('.list-group').on('click', 'span', function() {
+  // get current text
+  var date = $(this)
+  .text()
+  .trim();
+
+  // create new input element
+  var dateInput = $('<input>')
+  // sets a new attribute since there are two arguments
+  .attr('type', 'text')
+  .addClass('form-control')
+  .val(date);
+
+  // swap out elements
+  $(this).replaceWith(dateInput);
+
+  // when the due date is edited...
+  dateInput.datepicker({
+    // pull up a calendar with tomorrow as the earliest possible selection
+    minDate: 1,
+    onClose: function() {
+      // when calendar is closed, force a 'change' event on the `dateInput`/`this`
+      $(this).trigger('change');
+    }
+  });
+
+  // automatically focus on new element
+  dateInput.trigger('focus');
+});
+
+// for any <input> elements, with a type of `text`, that change within a parent element with a class of `list-group`, perform this function...
+$('.list-group').on('change', 'input[type="text"]', function() {
+  // get current text
+  var date = $(this)
+  .val()
+  .trim();
+
+  // get the parent <ul>'s id attribute
+  var status = $(this)
+  .closest('.list-group')
+  .attr('id')
+  .replace('list-', '');
+
+  // get the task's position in the list of other <li> elements
+  var index = $(this)
+  .closest('.list-group-item')
+  .index();
+
+  // update task in array and re-save to `localStorage`
+  tasks[status][index].date = date;
+  saveTasks();
+
+  // recreate <span> element with bootstrap classes
+  var taskSpan = $('<span>')
+  .addClass('badge badge-primary badge-pill')
+  .text(date);
+
+  // replace input with span element
+  $(this).replaceWith(taskSpan);
+
+  // pass task's <li> element into auditTask() to check new due date
+  auditTask($(taskSpan).closest('.list-group-item'));
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
@@ -61,7 +197,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -82,6 +218,110 @@ $("#task-form-modal .btn-primary").click(function() {
   }
 });
 
+// modal's due date field is selected, show calendar
+$('#modalDueDate').datepicker({
+  // the first available date to select is today + 1...or tomorrow
+  minDate: 1,
+});
+
+// every element with a `list-group` class, nested within a `card` class, is a sortable list.
+$('.card .list-group').sortable({
+  // elements with a `list-group` class, nested within a `card` class, are connected as 'sortable'.
+  connectWith: $('.card .list-group'),
+  // prevents the dragged element from scrolling the page
+  scroll: false,
+  // sets the where the test is held to determine if the moved item is hovering over a valid item. 
+  // here it is saying to look for wherever the cursor is
+  tolerance: 'pointer',
+  // creates a copy of the dragged element that moves instead of the original element selected.
+  helper: 'clone',
+
+  // when the drag event is activated... 
+  activate: function(event) {
+    // give all lists a class of `dropover`
+    $(this).addClass('dropover');
+    // give elements w/ `bottom-trash` classes an additional class of `bottom-trash-drag`
+    $('.bottom-trash').addClass('bottom-trash-drag');
+  },
+
+  // when the dragged item moves away from a list, remove the list's `dropover-active` class
+  out: function(event) {
+    $(event.target).removeClass('dropover-active');
+  },
+
+  // when the dragged item hovers above a list, give it the `dropover-active` class
+  over: function(event) {
+    $(event.target).addClass('dropover-active');
+  },
+
+  // when the drag event stops...
+  deactivate: function(event) {
+    // remove the `dropover` class from all lists.
+    $(this).removeClass('dropover');
+    // remove the 'bottom-trash-drag' class from element with a class of `bottom-trash`
+    $('.bottom-trash').removeClass('bottom-trash-drag');
+  },
+
+  update: function(event) {
+    // empty array to store task data in
+    var taskListArr = [];
+
+    // loop over current set of children in sortable list
+    $(this).children().each(function() {
+      // find the <p> elements of the children being looped over and trim their text
+      var text = $(this)
+      .find('p')
+      .text()
+      .trim();
+
+      // find the <span> elements of the children being looped over and trim their text.
+      var date = $(this)
+      .find('span')
+      .text()
+      .trim();
+
+      // push the found texts and dates of any <li>s into an array, as an object. 
+      taskListArr.push({
+        text: text, 
+        date: date
+      });
+    });
+
+    // trim down the list's ID to match it's `tasks` object property
+    var arrName = $(this)
+    .attr('id')
+    .replace('list-', '');
+
+    // update array on `tasks` object and save to localStorage
+    tasks[arrName] = taskListArr;
+    saveTasks();
+  },
+});
+
+// designates any element with an id of `trash` is a droppable element.
+$('#trash').droppable({
+  // the droppable element accepts any `list-group-item` coming from a `card`
+  accept: '.card .list-group-item',
+  // as soon as the draggable element itself touches the droppable element, it is able to be dropped.
+  tolerance: 'touch',
+
+  // when the `bottom-trash` element is hovered over, add the `bottom-trash-active` class to it.
+  over: function(event) {
+    $('.bottom-trash').addClass('bottom-trash-active');
+  },
+
+  // when the draggable element is moved away from `bottom-trash`, removes `bottom-trash`'s `bottom-trash-active` class.
+  out: function(event) {
+    $('.bottom-trash').removeClass('bottom-trash-active');
+  },
+
+  // on element drop, perform the `remove()` method on the draggable element, and remove`bottom-trash`'s `bottom-trash-active` class.  
+  drop: function(event, ui) {
+    ui.draggable.remove();
+    $('.bottom-trash').removeClass('bottom-trash-active');
+  },
+});
+
 // remove all tasks
 $("#remove-tasks").on("click", function() {
   for (var key in tasks) {
@@ -94,4 +334,12 @@ $("#remove-tasks").on("click", function() {
 // load tasks for the first time
 loadTasks();
 
-
+// sets up logic to continuously run 
+setInterval(function() {
+  // find the child `list-group-items` in parent `card` items and for each..
+  // ..pass it through a callback function that calls `auditTask` and passes `el`(list-group-item) through it
+  $('.card .list-group-item').each(function (el) {
+    auditTask(el);
+  });
+  // ...after a certain amount of time has passed.
+}, 1800000);
