@@ -197,7 +197,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -235,6 +235,32 @@ $('.card .list-group').sortable({
   tolerance: 'pointer',
   // creates a copy of the dragged element that moves instead of the original element selected.
   helper: 'clone',
+
+  // when the drag event is activated... 
+  activate: function(event) {
+    // give all lists a class of `dropover`
+    $(this).addClass('dropover');
+    // give elements w/ `bottom-trash` classes an additional class of `bottom-trash-drag`
+    $('.bottom-trash').addClass('bottom-trash-drag');
+  },
+
+  // when the dragged item moves away from a list, remove the list's `dropover-active` class
+  out: function(event) {
+    $(event.target).removeClass('dropover-active');
+  },
+
+  // when the dragged item hovers above a list, give it the `dropover-active` class
+  over: function(event) {
+    $(event.target).addClass('dropover-active');
+  },
+
+  // when the drag event stops...
+  deactivate: function(event) {
+    // remove the `dropover` class from all lists.
+    $(this).removeClass('dropover');
+    // remove the 'bottom-trash-drag' class from element with a class of `bottom-trash`
+    $('.bottom-trash').removeClass('bottom-trash-drag');
+  },
 
   update: function(event) {
     // empty array to store task data in
@@ -278,9 +304,21 @@ $('#trash').droppable({
   accept: '.card .list-group-item',
   // as soon as the draggable element itself touches the droppable element, it is able to be dropped.
   tolerance: 'touch',
-  // on element drop, perform the `remove()` method on the draggable element. 
+
+  // when the `bottom-trash` element is hovered over, add the `bottom-trash-active` class to it.
+  over: function(event) {
+    $('.bottom-trash').addClass('bottom-trash-active');
+  },
+
+  // when the draggable element is moved away from `bottom-trash`, removes `bottom-trash`'s `bottom-trash-active` class.
+  out: function(event) {
+    $('.bottom-trash').removeClass('bottom-trash-active');
+  },
+
+  // on element drop, perform the `remove()` method on the draggable element, and remove`bottom-trash`'s `bottom-trash-active` class.  
   drop: function(event, ui) {
     ui.draggable.remove();
+    $('.bottom-trash').removeClass('bottom-trash-active');
   },
 });
 
