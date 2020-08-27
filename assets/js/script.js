@@ -65,7 +65,6 @@ var auditTask = function (taskEl) {
   else if (Math.abs(moment().diff(time, 'days')) <= 2) {
     $(taskEl).addClass('list-group-item-warning');
   }
-  
 }
 
 // for any <p> elements clicked within a parent element with a class of `list-group`, perform this function...
@@ -297,4 +296,12 @@ $("#remove-tasks").on("click", function() {
 // load tasks for the first time
 loadTasks();
 
-
+// sets up logic to continuously run 
+setInterval(function() {
+  // find the child `list-group-items` in parent `card` items and for each..
+  // ..pass it through a callback function that calls `auditTask` and passes `el`(list-group-item) through it
+  $('.card .list-group-item').each(function (el) {
+    auditTask(el);
+  });
+  // ...after a certain amount of time has passed.
+}, 1800000);
